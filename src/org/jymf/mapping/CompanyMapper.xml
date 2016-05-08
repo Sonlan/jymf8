@@ -1,0 +1,742 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jymf.dao.CompanyMapper">
+	<resultMap id="BaseResultMap" type="org.jymf.entity.Company">
+		<id column="ID" jdbcType="DECIMAL" property="id" />
+		<result column="NAME" jdbcType="VARCHAR" property="name" />
+		<result column="LICENSE_NUM" jdbcType="VARCHAR" property="licenseNum" />
+		<result column="ADDRESS" jdbcType="VARCHAR" property="address" />
+		<result column="PERSON" jdbcType="VARCHAR" property="person" />
+		<result column="CAPITAL" jdbcType="DECIMAL" property="capital" />
+		<result column="SCOPE" jdbcType="VARCHAR" property="scope" />
+		<result column="BEGIN_TIME" jdbcType="DATE" property="beginTime" />
+		<result column="DURATION" jdbcType="DECIMAL" property="duration" />
+		<result column="TNAME" jdbcType="VARCHAR" property="tname" />
+		<result column="TAX_NUM" jdbcType="VARCHAR" property="taxNum" />
+		<result column="FLAG" jdbcType="DECIMAL" property="flag" />
+		<result column="AUDIT_TIME" jdbcType="DATE" property="auditTime" />
+		<result column="AUDIT_VALID" jdbcType="DECIMAL" property="auditValid" />
+		<result column="AUDIT_RESULT" jdbcType="VARCHAR" property="auditResult" />
+		<result column="WORK_MODE" jdbcType="DECIMAL" property="workMode" />
+		<result column="STATUS" jdbcType="DECIMAL" property="status" />
+		<result column="url" jdbcType="VARCHAR" property="url" />
+		<result column="tel" jdbcType="VARCHAR" property="tel" />
+		<result column="MONITOR_ID" jdbcType="VARCHAR" property="monitorId" />
+		<result column="MONITOR_NAME" jdbcType="VARCHAR" property="monitorName" />
+		<result column="AGENT_NAME" jdbcType="VARCHAR" property="agentName" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, NAME, LICENSE_NUM, ADDRESS, PERSON, CAPITAL, SCOPE, BEGIN_TIME,
+		DURATION, TNAME,
+		TAX_NUM, FLAG, AUDIT_TIME, AUDIT_VALID, AUDIT_RESULT, WORK_MODE, STATUS, URL, TEL
+	</sql>
+	
+	<select id="findAll" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM TBL_COMPANY
+	</select>
+	
+	<!--resultType="BaseResultMap" 每返回一条结果封装到BaseResultMap(公司列表)里 -->
+	<select id="queryCompanyMonitor" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM TBL_COMPANY
+		<where>
+		    1=1
+			<if test="t.name != null and t.name != ''">
+			AND	NAME like '%${t.name}%'
+			</if>
+			<if test="t.id != null and t.id != 0">
+			AND	ID = #{t.id,jdbcType=DECIMAL}
+			</if>
+			<if test="t.flag != null">
+				AND FLAG = #{t.flag,jdbcType=DECIMAL}
+			</if>
+			<if test="t.status != null">
+				AND STATUS = #{t.status,jdbcType=DECIMAL}
+			</if>
+			AND ID NOT IN (SELECT COMPANY_ID FROM TBL_COMPANY_MONITOR_RELATION  WHERE  MONITOR_ID=#{monitorId,jdbcType=DECIMAL})
+ 		</where>
+		ORDER BY ID DESC 
+	</select>
+	
+	<!--resultType="BaseResultMap" 每返回一条结果封装到BaseResultMap(公司列表)里 -->
+	<select id="queryAgentUpdate" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM TBL_COMPANY
+		<where>
+		    1=1
+			<if test="t.name != null and t.name != ''">
+			AND	NAME like '%${t.name}%'
+			</if>
+			<if test="t.id != null and t.id != 0">
+			AND	ID = #{t.id,jdbcType=DECIMAL}
+			</if>
+			<if test="t.flag != null">
+				AND FLAG = #{t.flag,jdbcType=DECIMAL}
+			</if>
+			<if test="t.status != null">
+				AND STATUS = #{t.status,jdbcType=DECIMAL}
+			</if>
+			AND ID NOT IN (SELECT COMPANY_ID FROM TBL_AGENT_MONITOR_RELATION  WHERE  AGENT_ID=#{agentId,jdbcType=DECIMAL})
+ 		</where>
+		ORDER BY ID DESC
+	</select>
+	
+	
+	<!--resultType="BaseResultMap" 每返回一条结果封装到BaseResultMap(公司列表)里 -->
+	<select id="queryAgentCompany" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+		SELECT 
+		c.* 
+		FROM TBL_COMPANY c,TBL_AGENT_MONITOR_RELATION a
+		<where>
+		    1=1
+			<if test="t.name != null and t.name != ''">
+			AND	c.NAME like '%${t.name}%'
+			</if>
+			<if test="t.id != null and t.id != 0">
+			AND	c.ID = #{t.id,jdbcType=DECIMAL}
+			</if>
+			<if test="t.flag != null">
+				AND c.FLAG = #{t.flag,jdbcType=DECIMAL}
+			</if>
+			<if test="t.status != null">
+				AND c.STATUS = #{t.status,jdbcType=DECIMAL}
+			</if>
+			AND a.COMPANY_ID = c.id 
+			AND a.AGENT_ID=#{agentId,jdbcType=DECIMAL}
+			AND a.STATUS=0
+ 		</where>
+		ORDER BY c.ID DESC
+	</select>
+	
+	<!--resultType="BaseResultMap" 每返回一条结果封装到BaseResultMap(公司列表)里 -->
+	<select id="queryCompany1" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+		SELECT 
+		c.* 
+		FROM TBL_COMPANY c,TBL_COMPANY_MONITOR_RELATION a
+		<where>
+		    1=1
+			<if test="t.name != null and t.name != ''">
+			AND	c.NAME like '%${t.name}%'
+			</if>
+			<if test="t.id != null and t.id != 0">
+			AND	c.ID = #{t.id,jdbcType=DECIMAL}
+			</if>
+			<if test="t.licenseNum != null">
+			AND	c.LICENSE_NUM like '%${t.licenseNum}%'
+			</if>
+			AND a.COMPANY_ID=c.id 
+			AND a.MONITOR_ID=#{monitorId,jdbcType=DECIMAL}
+			AND a.STATUS=0
+ 		</where>
+	   UNION
+	   SELECT C.* FROM TBL_COMPANY C,
+		(SELECT T3.COMPANY_ID FROM TBL_COMPANY_MONITOR_RELATION T3,
+			(
+			   SELECT ID FROM TBL_COMPANY_MONITOR T1 WHERE T1.MONITOR_LIB_ID IN
+				(SELECT T2.ID FROM TBL_CUSTOMS_MONITOR T1, TBL_CUSTOMS_MONITOR T2 WHERE T1.ID = T2.PID AND T2.PID = #{companyMonitorId,jdbcType=DECIMAL})
+			) T4
+				WHERE T3.MONITOR_ID = T4.ID AND T3.STATUS=0
+		) A
+		WHERE 1= 1 AND C.ID = A.COMPANY_ID 
+		<if test="t.name != null and t.name != ''">
+			AND	C.NAME like '%${t.name}%'
+			</if>
+			<if test="t.id != null and t.id != 0">
+			AND	C.ID = #{t.id,jdbcType=DECIMAL}
+			</if>
+			<if test="t.licenseNum != null">
+			AND	C.LICENSE_NUM like '%${t.licenseNum}%'
+			</if>
+	</select>
+	
+	<!-- 查询一个监管用户下所有的企业 -->
+	<select id="findCompanyByMonitor" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+		SELECT com.*,relation.MONITOR_ID AS MONITOR_ID,T8.NAME AS MONITOR_NAME  FROM TBL_COMPANY_MONITOR_RELATION relation 
+					LEFT JOIN tbl_company com 
+					ON relation.company_id = com.id 
+					LEFT JOIN TBL_COMPANY_MONITOR T8
+					ON relation.MONITOR_ID = T8.ID
+		WHERE MONITOR_ID= #{monitorId,jdbcType=DECIMAL} AND relation.STATUS=0 
+		UNION
+		SELECT C.*,A.MONITOR_ID AS MONITOR_ID,A.MONITOR_NAME AS MONITOR_NAME FROM TBL_COMPANY C,
+		(SELECT T3.COMPANY_ID,T3.MONITOR_ID,T4.NAME AS MONITOR_NAME FROM TBL_COMPANY_MONITOR_RELATION T3,
+			(
+			   SELECT ID,NAME FROM TBL_COMPANY_MONITOR T1 WHERE T1.MONITOR_LIB_ID IN
+				(
+					<if test="companyMonitorId!='' ">
+					SELECT T2.ID FROM TBL_CUSTOMS_MONITOR T1, TBL_CUSTOMS_MONITOR T2 WHERE T1.ID = T2.PID AND T2.PID = #{companyMonitorId,jdbcType=DECIMAL}
+					</if>
+					<if test="companyMonitorId=='' ">
+					SELECT T2.ID FROM TBL_CUSTOMS_MONITOR T2 WHERE T2.ID != 1 
+					</if>
+				)
+			) T4
+				WHERE T3.MONITOR_ID = T4.ID AND T3.STATUS=0
+		) A
+		WHERE 1= 1 AND C.ID = A.COMPANY_ID 
+	</select>
+		
+		
+	<!--resultType="BaseResultMap" 每返回一条结果封装到BaseResultMap(公司列表)里 -->
+	<select id="query" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+		SELECT tc.ID, tc.NAME, tc.LICENSE_NUM, tc.ADDRESS, 
+		       tc.PERSON, tc.CAPITAL, tc.SCOPE, tc.BEGIN_TIME,
+		       tc.DURATION, tc.TNAME,
+		       tc.TAX_NUM, tc.FLAG, 
+		       tc.AUDIT_TIME, tc.AUDIT_VALID, 
+		       tc.AUDIT_RESULT, tc.WORK_MODE, tc.STATUS, tc.URL,
+		       agent.NAME as AGENT_NAME
+	 	 FROM TBL_COMPANY tc
+	 	 LEFT JOIN
+	 	      (
+	 	        SELECT m.NAME,
+	 	               r.COMPANY_ID
+	 	          FROM TBL_AGENT_MONITOR m,
+	 	               TBL_AGENT_MONITOR_RELATION r
+	 	         WHERE m.ID = r.AGENT_ID
+	 	           AND m.STATUS = 0
+	 	           AND r.STATUS = 0
+	 	      ) agent
+	 	   ON tc.ID = agent.COMPANY_ID
+		WHERE 1=1 AND tc.work_mode = 8
+			<if test="t.name != null and t.name != ''">
+			AND	tc.NAME like '%${t.name}%'
+			</if>
+			<if test="t.id != null and t.id != 0">
+			AND	tc.ID = #{t.id,jdbcType=DECIMAL}
+			</if>
+			<if test="t.flag != null">
+				AND tc.FLAG = #{t.flag,jdbcType=DECIMAL}
+			</if>
+			<if test="t.status != null">
+				AND tc.STATUS = #{t.status,jdbcType=DECIMAL}
+			</if>
+		ORDER BY tc.ID DESC
+	</select>
+		
+		
+	<!-- 选择企业时的分页操作 -->
+	<!-- 1、审核通过的企业 Flg=2 -->
+	<!-- 2、企业要在审核有效期内 AND sysdate >= AUDIT_TIME AND add_months(sysdate,12*AUDIT_VALID) >= sysdate -->
+	<!-- 3、工作状态要正常 -->
+	<select id="querySelect" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM TBL_COMPANY
+		<where>
+		    1=1
+			<if test="t.name != null and t.name != ''">
+			AND	NAME like '%${t.name}%'
+			</if>
+			<if test="t.id != null and t.id != 0">
+			AND	ID = #{t.id,jdbcType=DECIMAL}
+			</if>
+			AND FLG = 2
+			AND STATUS = 0
+		</where>
+		ORDER BY ID DESC
+	</select>
+	
+    <!-- 获取最大可用的ID -->
+    <select id="selectMaxId" resultType="java.math.BigDecimal">
+		SELECT Max(ID) + 1 AS ID FROM TBL_COMPANY
+	</select>
+	
+    <!-- 动态建表 -->
+    <!-- 创建企业标签信息表 -->
+    <update id="createLabel"  parameterType="java.util.HashMap">
+        CREATE TABLE IF NOT EXISTS TBL_LABEL_INFO_${companyId}
+        ( 
+          LABEL_ID BIGINT(25) NOT NULL , 
+          PRODUCT_ID BIGINT(25),
+          ISPACKAGE  TINYINT(4) DEFAULT 0,
+          ISPRODUCT  TINYINT(4) DEFAULT 0,
+          PACKAGE_ID  BIGINT,
+          SALES_AREA  INT(11),
+          PRODUCE_DATE  DATETIME,
+          BATCH_NUMBER  BIGINT(25),
+          ORIGIN_ADDR   VARCHAR(255),
+          QUERY_COUNT   INT DEFAULT 0,
+          CONS_COUNT    INT DEFAULT 0,
+          QUERY_TIME_FIRST  DATETIME,
+          cons_time_first DATETIME,
+          cons_addr_first INT(11),
+          STATUS  TINYINT(4),
+          TIMESTAMP DATETIME NOT NULL DEFAULT NOW(),
+          packstamp DATETIME,
+          terminaltype INT(11),
+          CONSTRAINT  TBL_LABEL_INFO_${companyId}_PK  PRIMARY KEY (LABEL_ID)
+        )
+    </update>
+    <!-- 创建串货信息表 -->
+    <update id="createAcInfo"  parameterType="java.util.HashMap">
+        CREATE TABLE IF NOT EXISTS TBL_AC_INFO_${companyId}
+        (
+          ID BIGINT(25)  NOT NULL AUTO_INCREMENT,
+          LABEL_ID  BIGINT(25), 
+          PRODUCT_ID  BIGINT(25), 
+          SALES_AREA  INT(11), 
+          CONLLISION_AREA  INT(11), 
+          CONLLISION_TIME  DATETIME, 
+          CONLLISION_TYPE  TINYINT(4), 
+          STATUS  TINYINT(4), 
+          device_id VARCHAR(32),
+          CONSTRAINT  TBL_AC_INFO_${companyId}_PK  PRIMARY KEY (ID)
+        )
+    </update>
+    
+    <!-- 创建稽查设备终端表 -->
+    <update id="createDevice"  parameterType="java.util.HashMap">
+        CREATE TABLE IF NOT EXISTS TBL_INSPECT_DEVICE_${companyId}
+        (
+          DEVICE_ID VARCHAR(32), 
+          STATUS TINYINT(4), 
+          operator VARCHAR(20),
+          AUTHORITY TINYINT(4)
+         )
+    </update>
+    
+    <!-- 创建企业产品类型表 -->
+    <update id="createProduct"  parameterType="java.util.HashMap">     
+        CREATE TABLE IF NOT EXISTS TBL_PRODUCT_${companyId}
+        (
+          ID BIGINT(25) NOT NULL, 
+	      TYPE INT, 
+	      NAME VARCHAR(255), 
+	      NUMBER_ID VARCHAR(32),
+	      CARTYPE VARCHAR(32),
+	      DESCRIPTION VARCHAR(2000), 
+	      PRODUCER VARCHAR(255), 
+	      ORIGIN VARCHAR(255), 
+	      URL VARCHAR(255), 
+	      BOX_CNT BIGINT(25) DEFAULT 0, 
+	      PALLET_CNT BIGINT(25) DEFAULT 0, 
+	      MAX_COUNT_QUEYR INT, 
+          MAX_COUNT_CONSQUERY INT,
+          CREATE_DATE DATETIME DEFAULT NOW(),
+          UPDATE_DATE DATETIME DEFAULT NOW(),
+          QUERY_DES  VARCHAR(255),
+          AUDIT_USER VARCHAR(64),
+          AUDIT_DATE DATETIME,
+          STATUS TINYINT(4) DEFAULT '1',
+          HSNUM VARCHAR(255),
+          CONSTRAINT  TBL_PRODUCT_${companyId}_PK  PRIMARY KEY (ID)
+         )
+    </update>
+       
+    <!-- 创建操作类型表 -->
+    <update id="createOptActions"  parameterType="java.util.HashMap">      
+        CREATE TABLE IF NOT EXISTS TBL_OPT_ACTIONS_${companyId}
+        (
+          
+          ID BIGINT(25) NOT NULL AUTO_INCREMENT,
+          LABEL_ID BIGINT(25),
+          OPT_ACTION TINYINT(4),
+          OPT_TIME DATETIME DEFAULT NOW(),
+          OPT_ADDR INT,
+          OPT_PERSON BIGINT(25), 
+          OPT_CARNO VARCHAR(32),
+          OPT_MEMO VARCHAR(255),
+          opt_dev_id BIGINT(25),
+          CONSTRAINT  TBL_OPT_ACTIONS_${companyId}_PK  PRIMARY KEY (ID)
+         )
+    </update>
+    
+    <!-- 创建以标签为基础的统计表 -->
+    <update id="createCount"  parameterType="java.util.HashMap">      
+         CREATE TABLE IF NOT EXISTS  TBL_COUNT_${companyId} 
+         (
+            ID           BIGINT(25) NOT NULL AUTO_INCREMENT,
+            product_id   BIGINT(25),
+            Product_name VARCHAR(128),
+            Active_Cnt   BIGINT(25)  DEFAULT 0,
+            Package_Cnt  BIGINT(25)  DEFAULT 0,
+            Out_Cnt      BIGINT(25)  DEFAULT 0,
+            In_Cnt       BIGINT(25)  DEFAULT 0,
+            Sales_Cnt    BIGINT(25)  DEFAULT 0,
+            Query_cnt    BIGINT(25)  DEFAULT 0,
+            Count_date   DATETIME DEFAULT NULL,
+            CONSTRAINT  TBL_COUNT_${companyId}_PK  PRIMARY KEY (ID)
+          ) 
+    </update>
+    
+    <!-- 创建以出库为基础的统计表 -->
+    <update id="createOutPutCount"  parameterType="java.util.HashMap">      
+         CREATE TABLE IF NOT EXISTS  TBL_OUT_COUNT_${companyId} 
+         (
+            ID           BIGINT(25) NOT NULL AUTO_INCREMENT,
+            product_id   BIGINT(25),
+            Product_name VARCHAR(128),
+            Sales_id     BIGINT(25)  DEFAULT 0,
+            sales_area   VARCHAR(100),
+            Out_Cnt      BIGINT(25)  DEFAULT 0,
+            Query_cnt    BIGINT(25)  DEFAULT 0,
+            Cons_cnt     BIGINT(25)  DEFAULT 0,
+            Ac_cnt       BIGINT(25)  DEFAULT 0,
+            Count_date   DATETIME DEFAULT NULL,
+            CONSTRAINT  TBL_OUT_COUNT_${companyId}_PK  PRIMARY KEY (ID)
+          ) 
+    </update>
+
+    <!-- 创建虚拟托盘表 -->
+    <!-- 酒类追溯模式使用 -->
+    <update id="createVpallet"  parameterType="java.util.HashMap">      
+         CREATE TABLE IF NOT EXISTS  TBL_VPALLET_${companyId} 
+         (
+            ID           BIGINT(25) NOT NULL AUTO_INCREMENT,
+            SIZE         TINYINT(4)  DEFAULT 0,
+            STATE        TINYINT(4)  DEFAULT 0,
+            CREATE_TIME  DATETIME NOT NULL DEFAULT NOW(),
+            LAST_TIME    DATETIME    DEFAULT NULL,
+            CONSTRAINT   TBL_VPALLET_${companyId}_PK  PRIMARY KEY (ID)
+          ) 
+    </update>
+    
+    <!-- 创建虚拟托盘关系表 -->
+    <!-- 酒类追溯模式使用 -->
+    <update id="createVpalletRelation"  parameterType="java.util.HashMap">      
+         CREATE TABLE IF NOT EXISTS  TBL_VPALLET_RELATION_${companyId} 
+         (
+            ID           BIGINT(25) NOT NULL AUTO_INCREMENT,
+            VPALLET_ID   BIGINT(25),
+            BOX_ID       BIGINT(25),
+            STATE        TINYINT(4)  DEFAULT 0,
+            CONSTRAINT   TBL_VPALLET_RELATION_${companyId}_PK  PRIMARY KEY (ID)
+          ) 
+    </update>
+    
+    <!-- 创建产品类型表 -->
+    <!-- 酒类追溯模式使用 -->
+    <update id="createProductType"  parameterType="java.util.HashMap">      
+         CREATE TABLE IF NOT EXISTS  TBL_PRODUCT_TYPE_${companyId} 
+         (
+            ID           BIGINT(25) NOT NULL AUTO_INCREMENT,
+            PARENTID     BIGINT(25),
+            NAME         VARCHAR(128),
+            CONSTRAINT   TBL_PRODUCT_TYPE_${companyId}_PK PRIMARY KEY (ID)
+          ) 
+    </update>
+    
+    <!-- 创建预申请表 进出口模式使用   -->
+    <update id="createPreLabel"  parameterType="java.util.HashMap">      
+         CREATE TABLE IF NOT EXISTS  TBL_PRELABEL_${companyId} 
+         (
+            id           BIGINT(25) NOT NULL AUTO_INCREMENT,
+            pid     	 BIGINT(25),
+            start_tid    BIGINT(25),
+            end_tid      BIGINT(25),
+            pos_tid      BIGINT(25),
+            status		 TINYINT(4),
+            create_date  DATETIME DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT   TBL_PRELABEL_${companyId}_PK PRIMARY KEY (ID)
+          ) 
+    </update>
+    
+    <!-- 创建进口计划单表 进出口模式使用   -->
+    <update id="createImportPlan"  parameterType="java.util.HashMap">      
+         CREATE TABLE IF NOT EXISTS  TBL_IMPORT_PLAN_${companyId} 
+         (
+            id           BIGINT(25) NOT NULL AUTO_INCREMENT,
+			batch_no     VARCHAR(255),
+			hnum		 VARCHAR(255),
+			hunit		 VARCHAR(255),
+			from_addr    VARCHAR(255),       
+			to_addr      VARCHAR(255),
+            status		 TINYINT(4),
+            create_date  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            release_date TIMESTAMP,
+			dest_addr    VARCHAR(255),       
+            isactive	 TINYINT(4),
+            CONSTRAINT   TBL_IMPORT_PLAN_${companyId}_PK PRIMARY KEY (ID)
+          ) 
+    </update>
+    
+     <!-- 创建进口计划单 产品 表 进出口模式使用   -->
+    <update id="createImportPlanProduct"  parameterType="java.util.HashMap">      
+         CREATE TABLE IF NOT EXISTS  TBL_IMPORT_PRODUCTLIST_${companyId} 
+         (
+            id           BIGINT(25) NOT NULL,
+			pid     	 BIGINT(25),
+            start_tid    BIGINT(25),
+            end_tid      BIGINT(25),
+            status		 TINYINT(4)
+          ) 
+    </update>
+    
+	<!-- 以下为工具生成SQL，可直接使用，修改需加履历 -->
+	<select id="selectByPrimaryKey" parameterType="java.math.BigDecimal"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from TBL_COMPANY
+		where ID = #{id,jdbcType=DECIMAL}
+	</select>
+	
+	<delete id="deleteByPrimaryKey" parameterType="java.math.BigDecimal">
+		delete from TBL_COMPANY
+		where ID = #{id,jdbcType=DECIMAL}
+	</delete>
+	
+	<insert id="insert" parameterType="org.jymf.entity.Company">
+		insert into TBL_COMPANY (
+		    ID,
+		    NAME, 
+		    LICENSE_NUM,
+		    ADDRESS, 
+		    PERSON, 
+		    CAPITAL,
+		    SCOPE, 
+		    BEGIN_TIME, 
+		    DURATION,
+		    TNAME, 
+		    TAX_NUM, 
+		    FLAG,
+		    AUDIT_TIME, 
+		    AUDIT_VALID, 
+		    AUDIT_RESULT,
+		    WORK_MODE, 
+		    STATUS,
+		    URL,
+		    TEL)
+		values (
+		    #{id,jdbcType=DECIMAL}, 
+			#{name,jdbcType=VARCHAR},
+			#{licenseNum,jdbcType=VARCHAR},
+			#{address,jdbcType=VARCHAR},
+			#{person,jdbcType=VARCHAR}, 
+			#{capital,jdbcType=DECIMAL},
+			#{scope,jdbcType=VARCHAR}, 
+			#{beginTime,jdbcType=DATE},
+			#{duration,jdbcType=DECIMAL},
+			#{tname,jdbcType=VARCHAR}, 
+			#{taxNum,jdbcType=VARCHAR}, 
+			#{flag,jdbcType=DECIMAL},
+			#{auditTime,jdbcType=DATE}, 
+			#{auditValid,jdbcType=DECIMAL},
+			#{auditResult,jdbcType=VARCHAR},
+			#{workMode,jdbcType=DECIMAL}, 
+			#{status,jdbcType=DECIMAL},
+			#{url,jdbcType=VARCHAR},
+			#{tel,jdbcType=VARCHAR}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="org.jymf.entity.Company">
+		insert into TBL_COMPANY
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="name != null">
+				NAME,
+			</if>
+			<if test="licenseNum != null">
+				LICENSE_NUM,
+			</if>
+			<if test="address != null">
+				ADDRESS,
+			</if>
+			<if test="person != null">
+				PERSON,
+			</if>
+			<if test="capital != null">
+				CAPITAL,
+			</if>
+			<if test="scope != null">
+				SCOPE,
+			</if>
+			<if test="beginTime != null">
+				BEGIN_TIME,
+			</if>
+			<if test="duration != null">
+				DURATION,
+			</if>
+			<if test="tname != null">
+				TNAME,
+			</if>
+			<if test="taxNum != null">
+				TAX_NUM,
+			</if>
+			<if test="flag != null">
+				FLAG,
+			</if>
+			<if test="auditTime != null">
+				AUDIT_TIME,
+			</if>
+			<if test="auditValid != null">
+				AUDIT_VALID,
+			</if>
+			<if test="auditResult != null">
+				AUDIT_RESULT,
+			</if>
+			<if test="workMode != null">
+				WORK_MODE,
+			</if>
+			<if test="status != null">
+				STATUS,
+			</if>
+			<if test="url != null">
+                URL,
+            </if>
+            <if test="tel != null">
+                TEL,
+            </if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=DECIMAL},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="licenseNum != null">
+				#{licenseNum,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="person != null">
+				#{person,jdbcType=VARCHAR},
+			</if>
+			<if test="capital != null">
+				#{capital,jdbcType=DECIMAL},
+			</if>
+			<if test="scope != null">
+				#{scope,jdbcType=VARCHAR},
+			</if>
+			<if test="beginTime != null">
+				#{beginTime,jdbcType=DATE},
+			</if>
+			<if test="duration != null">
+				#{duration,jdbcType=DECIMAL},
+			</if>
+			<if test="tname != null">
+				#{tname,jdbcType=VARCHAR},
+			</if>
+			<if test="taxNum != null">
+				#{taxNum,jdbcType=VARCHAR},
+			</if>
+			<if test="flag != null">
+				#{flag,jdbcType=DECIMAL},
+			</if>
+			<if test="auditTime != null">
+				#{auditTime,jdbcType=DATE},
+			</if>
+			<if test="auditValid != null">
+				#{auditValid,jdbcType=DECIMAL},
+			</if>
+			<if test="auditResult != null">
+				#{auditResult,jdbcType=VARCHAR},
+			</if>
+			<if test="workMode != null">
+				#{workMode,jdbcType=DECIMAL},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=DECIMAL},
+			</if>
+			<if test="url != null">
+                #{url,jdbcType=VARCHAR},
+            </if>
+            <if test="tel != null">
+                #{tel,jdbcType=VARCHAR},
+            </if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="org.jymf.entity.Company">
+		update TBL_COMPANY
+		<set>
+			<if test="name != null and name != ''">
+				NAME = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="licenseNum != null and licenseNum != ''">
+				LICENSE_NUM = #{licenseNum,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null and address != ''">
+				ADDRESS = #{address,jdbcType=VARCHAR},
+			</if>
+			<if test="person != null and person != ''">
+				PERSON = #{person,jdbcType=VARCHAR},
+			</if>
+			<if test="capital != null ">
+				CAPITAL = #{capital,jdbcType=DECIMAL},
+			</if>
+			<if test="scope != null and scope != ''">
+				SCOPE = #{scope,jdbcType=VARCHAR},
+			</if>
+			<if test="beginTime != null">
+				BEGIN_TIME = #{beginTime,jdbcType=DATE},
+			</if>
+			<if test="duration != null">
+				DURATION = #{duration,jdbcType=DECIMAL},
+			</if>
+			<if test="tname != null and tname != ''">
+				TNAME = #{tname,jdbcType=VARCHAR},
+			</if>
+			<if test="taxNum != null and taxNum != ''">
+				TAX_NUM = #{taxNum,jdbcType=VARCHAR},
+			</if>
+			<if test="flag != null">
+				FLAG = #{flag,jdbcType=DECIMAL},
+			</if>
+			<if test="auditTime != null">
+				AUDIT_TIME = #{auditTime,jdbcType=DATE},
+			</if>
+			<if test="auditValid != null">
+				AUDIT_VALID = #{auditValid,jdbcType=DECIMAL},
+			</if>
+			<if test="auditResult != null and auditResult != ''">
+				AUDIT_RESULT = #{auditResult,jdbcType=VARCHAR},
+			</if>
+			<if test="workMode != null">
+				WORK_MODE = #{workMode,jdbcType=DECIMAL},
+			</if>
+			<if test="status != null">
+				STATUS = #{status,jdbcType=DECIMAL},
+			</if>
+			<if test="url != null and url != ''">
+                URL = #{url,jdbcType=VARCHAR},
+            </if>
+            <if test="tel != null and tel != ''">
+                TEL = #{tel,jdbcType=VARCHAR},
+            </if>
+		</set>
+		where ID = #{id,jdbcType=DECIMAL}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="org.jymf.entity.Company">
+		update TBL_COMPANY
+		set NAME = #{name,jdbcType=VARCHAR},
+		LICENSE_NUM = #{licenseNum,jdbcType=VARCHAR},
+		ADDRESS = #{address,jdbcType=VARCHAR},
+		PERSON = #{person,jdbcType=VARCHAR},
+		CAPITAL = #{capital,jdbcType=DECIMAL},
+		SCOPE = #{scope,jdbcType=VARCHAR},
+		BEGIN_TIME = #{beginTime,jdbcType=DATE},
+		DURATION = #{duration,jdbcType=DECIMAL},
+		TNAME = #{tname,jdbcType=VARCHAR},
+		TAX_NUM = #{taxNum,jdbcType=VARCHAR},
+		FLAG = #{flag,jdbcType=DECIMAL},
+		AUDIT_TIME = #{auditTime,jdbcType=DATE},
+		AUDIT_VALID = #{auditValid,jdbcType=DECIMAL},
+		AUDIT_RESULT = #{auditResult,jdbcType=VARCHAR},
+		WORK_MODE = #{workMode,jdbcType=DECIMAL},
+		STATUS = #{status,jdbcType=DECIMAL},
+		URL = #{url,jdbcType=VARCHAR},
+		TEL = #{tel,jdbcType=VARCHAR}
+		where ID = #{id,jdbcType=DECIMAL}
+	</update>
+	<select id="getNumByLce" resultType="java.lang.Integer"
+		parameterType="java.lang.String">
+		SELECT
+		count(id)
+		FROM TBL_COMPANY where license_num = #{lceNum} and WORK_MODE = 8
+	</select>
+	<select id="getNumByCpName" resultType="java.lang.Integer"
+		parameterType="java.lang.String">
+		SELECT
+		count(name)
+		FROM TBL_COMPANY where name = #{cpName} and WORK_MODE = 8
+	</select>
+</mapper>

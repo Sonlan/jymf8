@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jymf.dao.LibWorldAreaMapper">
+  <resultMap id="BaseResultMap" type="org.jymf.entity.LibWorldArea">
+    <id column="ID" jdbcType="VARCHAR" property="id" />
+    <result column="AREA_NAME" jdbcType="VARCHAR" property="areaName" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    ID, AREA_NAME
+  </sql>
+  
+  <!-- 查询所有区域信息 -->
+  <select id="findAll" resultMap="BaseResultMap">
+  	select id, area_name from tbl_world_area 
+  </select>
+  
+</mapper>

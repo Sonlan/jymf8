@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jymf.dao.ImportPlanMapper">
+  <resultMap id="BaseResultMap" type="org.jymf.entity.ImportPlan">
+    <id column="ID" jdbcType="DECIMAL" property="id" />
+    <result column="PLAN_ID" jdbcType="VARCHAR" property="planId" />
+    <result column="PRO_ID" jdbcType="DECIMAL" property="proId" />
+    <result column="PRO_COUNT" jdbcType="DECIMAL" property="proCount" />
+    <result column="NAME" jdbcType="VARCHAR" property="proName" />
+    <result column="PRO_ORIGIN" jdbcType="VARCHAR" property="proOrigin" />
+    <result column="PRO_MATERIAL" jdbcType="VARCHAR" property="proMaterial" />
+    <result column="PRO_PRODUCE_INFO" jdbcType="VARCHAR" property="proProduceInfo" />
+    <result column="PRO_PRODUCE_DATE" jdbcType="DATE" property="proProduceDate" />
+    <result column="PRO_PRODUCE_NUM" jdbcType="VARCHAR" property="proProduceNum" />
+    <result column="PRO_FACTORY_DATE" jdbcType="DATE" property="proFactoryDate" />
+    <result column="DEPART_COUNTRY" jdbcType="VARCHAR" property="departCountry" />
+    <result column="DEPART_PORT" jdbcType="VARCHAR" property="departPort" />
+    <result column="DEPART_DATE" jdbcType="DATE" property="departDate" />
+    <result column="ARRIVAL_PORT_PLAN" jdbcType="VARCHAR" property="arrivalPortPlan" />
+    <result column="SHIPPING_TYPE" jdbcType="INTEGER" property="shippingType" />
+    
+    <result column="HNUM" jdbcType="VARCHAR" property="hnum" />
+    <result column="HUNIT" jdbcType="VARCHAR" property="hunit" />
+    <result column="INSPECT_FORM" jdbcType="VARCHAR" property="inspectForm" />
+    <result column="INSPECT_DATE" jdbcType="DATE" property="inspectDate" />
+    <result column="ARRIVAL_PORT" jdbcType="VARCHAR" property="arrivalPort" />
+    <result column="ARRIVAL_DATE" jdbcType="DATE" property="arrivalDate" />
+    <result column="DEST_ADDR" jdbcType="VARCHAR" property="destAddr" />
+    <result column="RELEASE_DATE" jdbcType="DATE" property="releaseDate" />
+    
+    <result column="FIRST_STOP" jdbcType="VARCHAR" property="firstStop" />
+    <result column="SECOND_STOP" jdbcType="VARCHAR" property="secondStop" />
+    <result column="CREATE_DATE" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+  </resultMap>
+
+  <select id="query" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+    SELECT
+		plan.ID,
+		plan.PLAN_ID,
+		plan.PRO_ID,
+		plan.PRO_COUNT,
+		pro.NAME,
+		plan.PRO_ORIGIN,
+		plan.PRO_MATERIAL,
+		plan.PRO_PRODUCE_INFO,
+		plan.PRO_PRODUCE_DATE,
+		plan.PRO_PRODUCE_NUM,
+		plan.PRO_FACTORY_DATE,
+		plan.DEPART_COUNTRY,
+		plan.DEPART_PORT,
+		plan.DEPART_DATE,
+		plan.ARRIVAL_PORT_PLAN,
+		plan.SHIPPING_TYPE,
+		
+		plan.HNUM,
+		plan.HUNIT,
+		plan.INSPECT_FORM,
+		plan.INSPECT_DATE,
+		plan.ARRIVAL_PORT,
+		plan.ARRIVAL_DATE,
+		plan.DEST_ADDR,
+		plan.RELEASE_DATE,
+		
+		plan.FIRST_STOP,
+		plan.SECOND_STOP,
+		plan.CREATE_DATE,
+		plan.CREATE_USER
+		
+    FROM tbl_import_plan_${companyId} AS plan left join tbl_product_${companyId} AS pro
+    on plan.pro_id = pro.id
+    where 1=1 
+    <if test="t.startDate != null and t.startDate != '' and t.endDate != null and t.endDate != ''">
+    	AND plan.DEPART_DATE BETWEEN '${t.startDate} 00:00:00' AND '${t.endDate} 23:59:59'
+    </if>
+    <if test="t.planId != null and t.planId != ''">
+    	AND plan.PLAN_ID like '%${t.planId}%'
+    </if>
+    <if test="t.proName != null and t.proName != ''">
+    	AND pro.NAME like '%${t.proName}%'
+    </if>
+    ORDER BY plan.ID DESC
+  </select>
+  
+  <insert id="add" parameterType="org.jymf.entity.ImportPlan" useGeneratedKeys="true" keyProperty="id">
+  	insert into tbl_import_plan_${companyId} 
+  	(
+		PLAN_ID,
+		PRO_ID,
+		PRO_COUNT,
+		PRO_ORIGIN,
+		PRO_MATERIAL,
+		PRO_PRODUCE_INFO,
+		PRO_PRODUCE_DATE,
+		PRO_PRODUCE_NUM,
+		PRO_FACTORY_DATE,
+		DEPART_COUNTRY,
+		DEPART_PORT,
+		DEPART_DATE,
+		ARRIVAL_PORT_PLAN,
+		SHIPPING_TYPE,
+		CREATE_USER,
+		CREATE_DATE
+  	) values (
+  		#{planId,jdbcType=VARCHAR},
+  		#{proId,jdbcType=DECIMAL},
+  		#{proCount,jdbcType=DECIMAL},
+  		#{proOrigin,jdbcType=VARCHAR},
+  		#{proMaterial,jdbcType=VARCHAR},
+  		#{proProduceInfo,jdbcType=VARCHAR},
+  		#{proProduceDate,jdbcType=DATE},
+  		#{proProduceNum,jdbcType=VARCHAR},
+  		#{proFactoryDate,jdbcType=DATE},
+  		#{departCountry,jdbcType=VARCHAR},
+  		#{departPort,jdbcType=VARCHAR},
+  		#{departDate,jdbcType=DATE},
+  		#{arrivalPortPlan,jdbcType=VARCHAR},
+  		#{shippingType,jdbcType=INTEGER},
+  		#{createUser,jdbcType=VARCHAR},
+  		NOW()
+  	)
+  </insert>
+  
+  <select id="findPlan" parameterType="org.jymf.entity.ImportPlan" resultMap="BaseResultMap">
+  	 SELECT
+		plan.ID,
+		plan.PLAN_ID,
+		plan.PRO_ID,
+		plan.PRO_COUNT,
+		pro.NAME,
+		plan.PRO_ORIGIN,
+		plan.PRO_MATERIAL,
+		plan.PRO_PRODUCE_INFO,
+		plan.PRO_PRODUCE_DATE,
+		plan.PRO_PRODUCE_NUM,
+		plan.PRO_FACTORY_DATE,
+		plan.DEPART_COUNTRY,
+		plan.DEPART_PORT,
+		plan.DEPART_DATE,
+		plan.ARRIVAL_PORT_PLAN,
+		plan.SHIPPING_TYPE,
+		
+		plan.HNUM,
+		plan.HUNIT,
+		plan.INSPECT_FORM,
+		plan.INSPECT_DATE,
+		plan.ARRIVAL_PORT,
+		plan.ARRIVAL_DATE,
+		plan.DEST_ADDR,
+		plan.RELEASE_DATE,
+		
+		plan.FIRST_STOP,
+		plan.SECOND_STOP,
+		plan.CREATE_DATE,
+		plan.CREATE_USER
+		
+    FROM tbl_import_plan_${companyId} AS plan left join tbl_product_${companyId} AS pro
+    on plan.pro_id = pro.id
+    where 1=1
+	<if test="id != null and id != '' ">
+		and plan.id = #{id,jdbcType=DECIMAL}
+	</if>
+  </select>
+  
+  <update id="update" parameterType="org.jymf.entity.ImportPlan">
+	  	update tbl_import_plan_${companyId} 
+	  	<set>
+	  		<if test="proId != null and proId != ''">
+	  			PRO_ID = #{proId,jdbcType=DECIMAL},
+	  		</if>
+	  		<if test="proCount != null and proCount != ''">
+	  			PRO_COUNT = #{proCount,jdbcType=DECIMAL},
+	  		</if>
+	  		<if test="proOrigin != null and proOrigin != ''">
+	  			PRO_ORIGIN = #{proOrigin,jdbcType=VARCHAR},
+	  		</if>
+	  		<if test="proMaterial != null and proMaterial != ''">
+	  			PRO_MATERIAL = #{proMaterial,jdbcType=VARCHAR},
+	  		</if>
+	  		<if test="proProduceInfo != null and proProduceInfo != ''">
+	  			PRO_PRODUCE_INFO = #{proProduceInfo,jdbcType=VARCHAR},
+	  		</if>
+	  		<if test="proProduceDate != null and proProduceDate != ''">
+	  			PRO_PRODUCE_DATE = #{proProduceDate,jdbcType=DATE},
+	  		</if>
+	  		<if test="proProduceNum != null and proProduceNum != ''">
+	  			PRO_PRODUCE_NUM = #{proProduceNum,jdbcType=VARCHAR},
+	  		</if>
+	  		<if test="proFactoryDate != null and proFactoryDate != ''">
+	  			PRO_FACTORY_DATE = #{proFactoryDate,jdbcType=DATE},
+	  		</if>
+	  		<if test="departCountry != null and departCountry != ''">
+	  			DEPART_COUNTRY = #{departCountry,jdbcType=VARCHAR},
+	  		</if>
+	  		<if test="departPort != null and departPort != ''">
+	  			DEPART_PORT = #{departPort,jdbcType=VARCHAR},
+	  		</if>
+	  		<if test="departDate != null and departDate != ''">
+	  			DEPART_DATE = #{departDate,jdbcType=DATE},
+	  		</if>
+	  		<if test="arrivalPortPlan != null and arrivalPortPlan != ''">
+	  			ARRIVAL_PORT_PLAN = #{arrivalPortPlan,jdbcType=VARCHAR},
+	  		</if>
+	  		<if test="shippingType != null and shippingType != ''">
+	  			SHIPPING_TYPE = #{shippingType,jdbcType=INTEGER},
+	  		</if>
+	  		<if test="hnum != null and hnum != ''">
+	  			HNUM = #{hnum,jdbcType=VARCHAR},
+	  		</if>
+	  		<if test="hunit != null and hunit != ''">
+	  			HUNIT = #{hunit,jdbcType=VARCHAR},
+	  		</if>
+	  		<if test="inspectForm != null and inspectForm != ''">
+	  			INSPECT_FORM = #{inspectForm,jdbcType=VARCHAR},
+	  		</if>
+	  		<if test="inspectDate != null and inspectDate != ''">
+	  			INSPECT_DATE = #{inspectDate,jdbcType=DATE},
+	  		</if>
+	  		<if test="arrivalPort != null and arrivalPort != ''">
+	  			ARRIVAL_PORT = #{arrivalPort,jdbcType=VARCHAR},
+	  		</if>
+	  		<if test="arrivalDate != null and arrivalDate != ''">
+	  			ARRIVAL_DATE = #{arrivalDate,jdbcType=DATE},
+	  		</if>
+	  		<if test="destAddr != null and destAddr != ''">
+	  			DEST_ADDR = #{destAddr,jdbcType=VARCHAR},
+	  		</if>
+	  		<if test="releaseDate != null and releaseDate != ''">
+	  			RELEASE_DATE = #{releaseDate,jdbcType=DATE},
+	  		</if>
+	  		<if test="firstStop != null and firstStop != ''">
+	  			FIRST_STOP = #{firstStop,jdbcType=VARCHAR},
+	  		</if>
+	  		<if test="secondStop != null and secondStop != ''">
+	  			SECOND_STOP = #{secondStop,jdbcType=VARCHAR},
+	  		</if>
+	  		<if test="createUser != null and createUser != ''">
+	  			CREATE_USER = #{createUser,jdbcType=VARCHAR},
+	  		</if>
+	  	</set>
+	  	where id = #{id,jdbcType=DECIMAL}
+  </update>
+  
+  <select id="findMaxPlanId" parameterType="java.util.Map" resultType="java.lang.String">
+  	SELECT MAX(plan_id) AS planId FROM tbl_import_plan_${companyId}
+  </select>
+</mapper>

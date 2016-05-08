@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jymf.dao.LibHnumMapper">
+  <resultMap id="BaseResultMap" type="org.jymf.entity.LibHnum">
+    <id column="ID" jdbcType="VARCHAR" property="id" />
+    <result column="PRODUCT_NAME" jdbcType="VARCHAR" property="productName" />
+  </resultMap>
+  
+  <select id="findAll" resultMap="BaseResultMap">
+  	select * from tbl_hnum 
+  </select>
+  
+  <insert id="insertHnum" parameterType="org.jymf.entity.LibHnum">
+  	insert into tbl_hnum ( id, product_name ) values (#{id,jdbcType=VARCHAR},#{productName,jdbcType=VARCHAR}) 
+  </insert>
+  
+</mapper>

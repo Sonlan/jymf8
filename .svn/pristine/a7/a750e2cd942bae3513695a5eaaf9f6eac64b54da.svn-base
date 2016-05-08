@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jymf.dao.ImportProductListMapper">
+  <resultMap id="BaseResultMap" type="org.jymf.entity.ImportProductList">
+    <result column="ID" jdbcType="DECIMAL" property="id" />
+    <result column="STATUS" jdbcType="INTEGER" property="status" />
+    <result column="START_TID" jdbcType="DECIMAL" property="startId" />
+    <result column="END_TID" jdbcType="DECIMAL" property="endId" />
+    <result column="PID" jdbcType="DECIMAL" property="productId" />
+    <result column="COUNT" jdbcType="DECIMAL" property="count" />
+    <result column="PRODUCT_NAME" jdbcType="VARCHAR" property="productName" />
+    <result column="HSNUM" jdbcType="VARCHAR" property="hsnum" />
+    
+  </resultMap>
+
+  <insert id="add" parameterType="org.jymf.entity.ImportProductList">
+  	insert into tbl_import_productlist_${companyId}
+  	(
+  		ID,
+  		STATUS,
+  		START_TID,
+  		END_TID,
+  		PID
+  	) values (
+  		#{id,jdbcType=DECIMAL},
+  		1,
+  		#{startId,jdbcType=DECIMAL},
+  		#{endId,jdbcType=DECIMAL},
+  		#{productId,jdbcType=DECIMAL}
+  	)
+  </insert>
+   
+  <select id="queryProductInfo" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	select 
+  		tip.STATUS,
+  		tip.START_TID,
+  		tip.END_TID,
+  		(tip.END_TID - tip.START_TID +1) as count,
+  		tip.PID,
+  		tp.name as product_name,
+  		tp.hsnum as hsnum
+  	from tbl_import_productlist_${t.companyId} as tip 
+  	left join tbl_product_${t.companyId} as tp on tip.pid = tp.id
+  	where 
+  		1=1
+  		<if test="t.productName != null and t.productName !='' ">
+  			and tp.name like '%${t.productName}%' 
+  		</if>
+  		<if test="t.startId != null and t.startId != '' ">
+  			and #{t.startId,jdbcType=DECIMAL} between tip.start_tid and tip.end_tid 
+  		</if>
+  		<if test="t.id != null and t.id != '' ">
+  			and tip.id = #{t.id,jdbcType=DECIMAL}
+  		</if>
+  </select> 
+   
+   <select id="findProductInfo" parameterType="org.jymf.entity.ImportProductList" resultMap="BaseResultMap">
+   	select 
+  		tip.STATUS,
+  		tip.START_TID,
+  		tip.END_TID,
+  		(tip.END_TID - tip.START_TID +1) as count,
+  		tip.PID,
+  		tp.name as product_name,
+  		tp.hsnum as hsnum
+  	from tbl_import_productlist_${companyId} as tip 
+  	left join tbl_product_${companyId} as tp on tip.pid = tp.id
+  	where 
+  		1=1
+  		<if test="productName != null and productName !='' ">
+  			and tp.name like '%${productName}%' 
+  		</if>
+  		<if test="startId != null and startId != '' ">
+  			and #{startId,jdbcType=DECIMAL} between tip.start_tid and tip.end_tid 
+  		</if>
+  		<if test="id != null and id != '' ">
+  			and tip.id = #{id,jdbcType=DECIMAL}
+  		</if>
+   </select>
+    
+</mapper>

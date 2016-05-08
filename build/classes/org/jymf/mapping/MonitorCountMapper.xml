@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jymf.dao.MonitorCountMapper" >
+  <resultMap id="BaseResultMap" type="org.jymf.entity.MonitorCount" >
+    <result column="PRODUCT_NAME" property="hsname" jdbcType="VARCHAR" />
+    <result column="HSNUM" property="hsnum" jdbcType="VARCHAR" />
+    <result column="LABELNUM" property="hscount" jdbcType="DECIMAL" />
+    <result column="NAME" property="proName" jdbcType="VARCHAR" />
+    <result column="ARRIVAL_PORT" property="arrivalPort" jdbcType="VARCHAR" />
+    <result column="DEST_ADDR" property="destAddr" jdbcType="VARCHAR" />
+    <result column="monitorname" property="monitor.name" jdbcType="VARCHAR" />
+    <result column="companyId" property="companyId" jdbcType="VARCHAR" />
+    <result column="DEPART_COUNTRY" property="departCountry" jdbcType="VARCHAR" />
+  </resultMap>
+      
+  <!-- 分页根据HS编码分类统计 -->
+  <select id="queryByHs" resultMap="BaseResultMap" parameterType="java.util.Map">
+   		SELECT result.hsnum,result.labelNum, hnum.`PRODUCT_NAME`,result.name FROM(
+   		SELECT hsCount.hsnum as hsnum,SUM(hsCount.labelNum) as labelNum,hsCount.name as name
+   		FROM (
+   			<foreach collection="t" item="item" index="i" >
+   			<if test="i>0">
+   				UNION ALL
+   			</if>
+   			SELECT pro.`HSNUM`,lable.labelNum,pro.`NAME`
+			FROM (	
+					SELECT dateResult.pid AS pid, SUM((dateResult.end_tid-dateResult.start_tid+1)) AS labelNum 
+					FROM 
+						(
+						 select * from `tbl_prelabel_${item.id}` where 1=1 
+						 <if test="count.startDate!=null and count.startDate != '' and count.endDate != null and count.endDate!= ''">
+						 	and create_date between '${count.startDate}' and '${count.endDate}'
+						 </if>
+						) as dateResult
+					GROUP BY dateResult.pid
+					) AS lable 
+			LEFT JOIN  `tbl_product_${item.id}` AS pro 
+			ON lable.pid=pro.`ID` 
+			</foreach>
+		) AS hsCount GROUP BY hsCount.hsnum
+		) AS result LEFT JOIN `tbl_hnum` hnum ON result.hsnum = hnum.`id` 
+   </select>
+  <!-- 查询全部，根据HS编码分类统计 -->
+  <select id="findAllByHs" resultMap="BaseResultMap" parameterType="java.util.Map">
+   		SELECT result.hsnum,result.labelNum, hnum.`PRODUCT_NAME` FROM(
+   		SELECT hsCount.hsnum as hsnum,SUM(hsCount.labelNum) as labelNum
+   		FROM (
+   			<foreach collection="t" item="item" index="i" >
+   			<if test="i>0">
+   				UNION ALL
+   			</if>
+   			SELECT pro.`HSNUM`,lable.labelNum
+			FROM (	
+					SELECT dateResult.pid AS pid, SUM((dateResult.end_tid-dateResult.start_tid+1)) AS labelNum 
+					FROM 
+						(
+						 select * from `tbl_prelabel_${item.id}` where 1=1 
+						 <if test="count.startDate!=null and count.startDate != '' and count.endDate != null and count.endDate!= ''">
+						 	and create_date between '${count.startDate}' and '${count.endDate}'
+						 </if>
+						) as dateResult
+					GROUP BY dateResult.pid
+					) AS lable 
+			LEFT JOIN  `tbl_product_${item.id}` AS pro 
+			ON lable.pid=pro.`ID` 
+			</foreach>
+		) AS hsCount GROUP BY hsCount.hsnum
+		) AS result LEFT JOIN `tbl_hnum` hnum ON result.hsnum = hnum.`id` 
+   </select>
+   
+   <!-- 根据启运国家查询 -->
+   <select id="queryBydepartCountry" resultMap="BaseResultMap" parameterType="java.util.Map">
+    	SELECT b.hsnum as HSNUM ,hnum.`product_name` as PRODUCT_NAME, SUM(b.pro_count) AS LABELNUM ,b.depart_country FROM
+		(
+			<foreach collection="t" item="item" index="i" >
+   			<if test="i>0">
+   				UNION ALL
+   			</if>
+			SELECT pro.`HSNUM`, a.pro_count, a.DEPART_COUNTRY FROM 
+			(SELECT pro_id,SUM(pro_count)AS pro_count , DEPART_COUNTRY FROM `tbl_import_plan_${item.id}` 
+			 WHERE 1=1
+			 <if test="count.departCountry!= null and count.departCountry!=''">
+			 	and depart_country LIKE '%${count.departCountry}%'  
+			 </if> 
+			 <if test="count.startDate!=null and count.startDate != '' and count.endDate != null and count.endDate!= ''">
+			 	and create_date between '${count.startDate}' and '${count.endDate}'
+			 </if>
+			 GROUP BY pro_id ) a
+			LEFT JOIN `tbl_product_${item.id}` pro ON a.pro_id = pro.`ID` 
+			</foreach>
+		) b INNER JOIN tbl_hnum AS hnum ON b.hsnum= hnum.`id` GROUP BY b.DEPART_COUNTRY
+    
+   </select>
+   
+   <select id="queryByArrivalPort" resultMap="BaseResultMap" parameterType="java.util.Map">
+   		SELECT b.hsnum as HSNUM ,hnum.`product_name` as PRODUCT_NAME, SUM(b.pro_count) AS LABELNUM ,b.arrival_port as ARRIVAL_PORT FROM 
+		(
+			<foreach collection="t" item="item" index="i" >
+   			<if test="i>0">
+   				UNION ALL
+   			</if>
+			SELECT pro.`HSNUM`, a.pro_count ,a.arrival_port FROM 
+			(SELECT pro_id,SUM(pro_count)AS pro_count,arrival_port FROM `tbl_import_plan_${item.id}` 
+			WHERE 1=1
+			 <if test="count.arrivalPort!= null and count.arrivalPort!=''">
+			 	and arrival_port LIKE '%${count.arrivalPort}%'  
+			 </if> 
+			 <if test="count.startDate!=null and count.startDate != '' and count.endDate != null and count.endDate!= ''">
+			 	and create_date between '${count.startDate}' and '${count.endDate}'
+			 </if>
+			GROUP BY pro_id ) a
+			LEFT JOIN `tbl_product_${item.id}` pro ON a.pro_id = pro.`ID` 
+			</foreach>
+		) b INNER JOIN tbl_hnum AS hnum ON b.hsnum= hnum.`id` GROUP BY b.arrival_port
+   </select>
+   
+   <select id="queryByDestAddr" resultMap="BaseResultMap" parameterType="java.util.Map">
+   		SELECT b.hsnum as HSNUM ,hnum.`product_name` as PRODUCT_NAME, SUM(b.pro_count) AS LABELNUM, b.dest_addr as dest_addr FROM 
+		(
+			<foreach collection="t" item="item" index="i" >
+   			<if test="i>0">
+   				UNION ALL
+   			</if>
+			SELECT pro.`HSNUM`, a.pro_count,a.dest_addr FROM 
+			(SELECT pro_id,SUM(pro_count)AS pro_count,dest_addr FROM `tbl_import_plan_${item.id}` 
+			WHERE 1=1
+			 <if test="count.destAddr != null and count.destAddr != ''">
+			 	and dest_addr LIKE '%${count.destAddr}%'  
+			 </if> 
+			 <if test="count.startDate!=null and count.startDate != '' and count.endDate != null and count.endDate!= ''">
+			 	and create_date between '${count.startDate}' and '${count.endDate}'
+			 </if>
+			GROUP BY pro_id ) a
+			LEFT JOIN `tbl_product_${item.id}` pro ON a.pro_id = pro.`ID` 
+			</foreach>
+		) b INNER JOIN tbl_hnum AS hnum ON b.hsnum= hnum.`id` GROUP BY b.dest_addr
+   </select>
+   
+   <select id="queryByFenju" resultMap="BaseResultMap" parameterType="java.util.Map">
+   		SELECT b.hsnum as HSNUM ,hnum.`product_name` as PRODUCT_NAME, SUM(b.pro_count) AS LABELNUM , b.companyId as companyId FROM 
+		(
+			<foreach collection="t" item="item" index="i" >
+   			<if test="i>0">
+   				UNION ALL
+   			</if>
+			SELECT pro.`HSNUM`, a.pro_count, '${item.id}' AS companyId  FROM 
+			(SELECT pro_id,SUM(pro_count)AS pro_count FROM `tbl_import_plan_${item.id}`
+			WHERE 1=1
+			 <if test="count.destAddr != null and count.destAddr != ''">
+			 	and dest_addr LIKE '%${count.destAddr}%'  
+			 </if> 
+			 <if test="count.startDate!=null and count.startDate != '' and count.endDate != null and count.endDate!= ''">
+			 	and create_date between '${count.startDate}' and '${count.endDate}'
+			 </if>
+			GROUP BY pro_id ) a
+			LEFT JOIN `tbl_product_${item.id}` pro ON a.pro_id = pro.`ID` 
+			</foreach>
+		) b INNER JOIN tbl_hnum AS hnum ON b.hsnum= hnum.`id` GROUP BY b.HSNUM
+   </select>
+   
+</mapper>

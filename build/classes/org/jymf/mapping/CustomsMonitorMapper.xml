@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jymf.dao.CustomsMonitorMapper" >
+  <resultMap id="BaseResultMap" type="org.jymf.entity.CustomsMonitor" >
+    <result column="id" property="id" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="pid" property="pId" jdbcType="VARCHAR" />
+  </resultMap>
+      
+  <select id="findCustomsMonitor" resultMap="BaseResultMap" parameterType="java.lang.String">
+	select * from tbl_customs_monitor where pid = #{monitorLibId,jdbcType=VARCHAR} or id = #{monitorLibId,jdbcType=VARCHAR}
+  </select>
+   
+  <select id="findCustomsMonitorById" resultMap="BaseResultMap" parameterType="java.lang.String">
+  	SELECT * FROM `tbl_customs_monitor` WHERE id = #{monitorId,jdbcType=VARCHAR}
+  </select> 
+   
+  <select id="findAllCustomsMonitor" resultMap="BaseResultMap" >
+  	SELECT * FROM `tbl_customs_monitor`
+  </select> 
+   
+</mapper>

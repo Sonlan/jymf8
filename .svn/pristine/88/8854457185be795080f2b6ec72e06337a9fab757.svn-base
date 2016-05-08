@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.jymf.dao.AuthorityMapper" >
+  
+  <resultMap id="BaseResultMap" type="org.jymf.entity.Authority" >
+    <result column="id" property="id" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="pid" property="pId" jdbcType="VARCHAR" />
+    <result column="auth_type" property="authType" jdbcType="INTEGER" />
+  </resultMap>
+
+	<select id="findAll" parameterType="java.util.Map" resultMap="BaseResultMap">
+		SELECT 	ta.id as id, 
+				ta.name as name,
+				ta.pid as pId  
+		FROM `tbl_auth` AS ta JOIN `tbl_auth_user_relation` AS taur ON ta.`id` = taur.`auth_id` 
+		WHERE taur.`user_id` = #{userId,jdbcType=VARCHAR}
+		AND ta.`auth_type`= #{authType,jdbcType=INTEGER}
+		AND taur.`auth_type`= #{authType,jdbcType=INTEGER}
+	</select>
+     
+    <update id="deleteAuthById" parameterType="java.util.Map">
+    	DELETE FROM `tbl_auth_user_relation` WHERE user_id = #{userId,jdbcType=VARCHAR} AND auth_type = #{authType,jdbcType=INTEGER}
+    </update> 
+     
+    <insert id="addAuth" parameterType="java.util.Map">
+    	INSERT INTO tbl_auth_user_relation(user_id,auth_id,auth_type)  
+    	VALUES(	
+    		#{userId,jdbcType=VARCHAR},
+    		#{auth,jdbcType=VARCHAR},
+    		#{authType,jdbcType=INTEGER}
+    		)
+    </insert>
+</mapper>

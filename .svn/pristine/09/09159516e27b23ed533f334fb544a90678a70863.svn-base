@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jymf.dao.LabelIndexMapper">
+  <resultMap id="BaseResultMap" type="org.jymf.entity.LabelIndex">
+    <id column="ID" jdbcType="DECIMAL" property="id" />
+    <result column="STATUS" jdbcType="DECIMAL" property="status" />
+    <result column="COMPANY_ID" jdbcType="DECIMAL" property="companyId" />
+    <result column="START_TID" jdbcType="DECIMAL" property="startTid" />
+    <result column="END_TID" jdbcType="DECIMAL" property="endTid" />
+    <result column="NAME" jdbcType="VARCHAR" property="name"/>
+    <result column="COUNT" jdbcType="DECIMAL" property="count"/>
+    <result column="POS_TID" jdbcType="DECIMAL" property="useCount"/>
+    <result column="FINAL_COUNT" jdbcType="DECIMAL" property="finalCount"/>
+    <result column="WORK_MODE" jdbcType="DECIMAL" property="workMode"/>
+    <result column="CREATE_DATE" jdbcType="VARCHAR" property="createDate"/>
+    <result column="PRODUCT_ID" jdbcType="DECIMAL" property="productId" />
+    <result column="PRODUCT_NAME" jdbcType="VARCHAR" property="productName" />
+  </resultMap>
+
+  <!--resultType="BaseResultMap" 每返回一条结果封装到BaseResultMap(公司列表)里 -->
+  <!-- cqs 2014/05/13 add -->
+  <select id="query" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+    SELECT
+          label.ID,
+          label.START_TID,
+          label.END_TID,
+          com.name,
+          com.WORK_MODE,
+          label.COMPANY_ID,
+          label.STATUS,
+          (CAST(label.END_TID AS SIGNED)-CAST(label.START_TID AS SIGNED)+1) AS COUNT,CREATE_DATE
+     FROM TBL_LABEL_INDEX label,TBL_COMPANY com
+           <if test="agentId != null and agentId != 0">
+            ,TBL_AGENT_MONITOR_RELATION a
+           </if>
+    <where>
+          1=1 AND com.WORK_MODE = 8
+      <if test="t.name != null and t.name != ''">
+      AND  com.NAME like '%${t.name}%'
+      </if>
+      AND label.COMPANY_ID = com.ID
+      <if test="agentId != null and agentId != 0">
+      AND a.AGENT_ID = #{agentId,jdbcType=DECIMAL}
+      AND label.COMPANY_ID = a.COMPANY_ID
+      AND a.STATUS = 0
+      </if>
+      </where>
+      ORDER BY label.START_TID DESC,label.COMPANY_ID DESC
+  </select>
+    
+  <select id="selectByPrimaryKey" parameterType="java.math.BigDecimal" resultMap="BaseResultMap">
+    SELECT 
+          label.ID,
+          label.START_TID,
+          label.END_TID,
+          label.STATUS,
+          label.COMPANY_ID,
+          com.name,
+          (CAST(label.END_TID AS SIGNED)-CAST(label.START_TID AS SIGNED)+1) AS COUNT
+     FROM TBL_LABEL_INDEX label
+     LEFT JOIN TBL_COMPANY com
+       ON label.COMPANY_ID = com.ID
+    WHERE label.ID = #{id,jdbcType=DECIMAL}
+  </select>
+  
+  <select id="findByLabelId" parameterType="java.math.BigDecimal" resultMap="BaseResultMap">
+    SELECT 
+          label.ID,
+          label.START_TID,
+          label.END_TID,
+          label.STATUS,
+          label.COMPANY_ID,
+          com.name,
+          (CAST(label.END_TID AS SIGNED)-CAST(label.START_TID AS SIGNED)+1) AS COUNT
+     FROM TBL_LABEL_INDEX label
+     LEFT JOIN TBL_COMPANY com
+       ON label.COMPANY_ID = com.ID
+    WHERE #{labelId,jdbcType=DECIMAL} BETWEEN label.START_TID AND label.END_TID
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.math.BigDecimal">
+    delete from TBL_LABEL_INDEX
+    where ID = #{id,jdbcType=DECIMAL}
+  </delete>
+  
+  <insert id="insert" parameterType="org.jymf.entity.LabelIndex">
+    insert into TBL_LABEL_INDEX (ID, STATUS, COMPANY_ID, 
+      START_TID, END_TID)
+    values (#{id,jdbcType=DECIMAL}, #{status,jdbcType=DECIMAL}, #{companyId,jdbcType=DECIMAL}, 
+      #{startTid,jdbcType=DECIMAL}, #{endTid,jdbcType=DECIMAL})
+  </insert>
+  
+  <insert id="insertSelective" parameterType="org.jymf.entity.LabelIndex">
+    insert into TBL_LABEL_INDEX
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      ID,
+      <if test="status != null">
+        STATUS,
+      </if>
+      <if test="companyId != null">
+        COMPANY_ID,
+      </if>
+      <if test="startTid != null">
+        START_TID,
+      </if>
+      <if test="endTid != null">
+        END_TID,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      SEQ_TBL_LABEL_INDEX_ID.NEXTVAL,
+      <if test="status != null">
+        #{status,jdbcType=DECIMAL},
+      </if>
+      <if test="companyId != null">
+        #{companyId,jdbcType=DECIMAL},
+      </if>
+      <if test="startTid != null">
+        #{startTid,jdbcType=DECIMAL},
+      </if>
+      <if test="endTid != null">
+        #{endTid,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="org.jymf.entity.LabelIndex">
+    update TBL_LABEL_INDEX
+    <set>
+      <if test="status != null">
+        STATUS = #{status,jdbcType=DECIMAL},
+      </if>
+      <if test="companyId != null">
+        COMPANY_ID = #{companyId,jdbcType=DECIMAL},
+      </if>
+      <if test="startTid != null">
+        START_TID = #{startTid,jdbcType=DECIMAL},
+      </if>
+      <if test="endTid != null">
+        END_TID = #{endTid,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=DECIMAL}
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="org.jymf.entity.LabelIndex">
+    update TBL_LABEL_INDEX
+    set STATUS = #{status,jdbcType=DECIMAL},
+      COMPANY_ID = #{companyId,jdbcType=DECIMAL},
+      START_TID = #{startTid,jdbcType=DECIMAL},
+      END_TID = #{endTid,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=DECIMAL}
+  </update>
+  
+  <select id="findMaxLabel" parameterType="java.util.Map" resultType="java.math.BigDecimal">
+  	SELECT MAX(end_tid) 
+  	FROM tbl_label_index 
+  	where 1=1 
+  		<if test="t.labelType == 1">
+  		 	and end_tid >= 900000000000
+  		</if>
+  		<if test="t.labelType == 0">
+  			and end_tid >= 100000000000 and end_tid &lt; 900000000000
+  		</if> 
+  </select>
+  
+  <!-- 预申请单查询 -->
+  <select id="queryPreLabel" resultMap="BaseResultMap" parameterType="java.util.HashMap" >
+  	 SELECT
+          label.ID ,
+	 	  pro.id as PRODUCT_ID, 
+          pro.name as PRODUCT_NAME,
+          label.START_TID,
+          label.END_TID,
+          (label.END_TID - label.START_TID + 1) AS COUNT,
+          label.POS_TID as useCount,
+          (label.END_TID - label.START_TID + 1 - label.POS_TID) AS FINAL_COUNT,
+          label.STATUS,
+          label.CREATE_DATE
+     FROM tbl_prelabel_${t.companyId} label 
+     left join tbl_product_${t.companyId} pro on label.pid = pro.id 
+    <where>
+      1=1
+      <if test="t.productName != null and t.productName != ''">
+      AND  pro.NAME like '%${t.productName}%'
+      </if>
+      </where>
+      ORDER BY label.ID DESC 
+  </select>
+  
+  <!-- 查询可用预申请 -->
+  <select id="queryUsablePreLabel" resultMap="BaseResultMap" parameterType="java.util.HashMap" >
+  	 SELECT
+          label.ID ,
+	 	  pro.id as PRODUCT_ID, 
+          pro.name as PRODUCT_NAME,
+          pro.hsnum as HSNUM,
+          SUM((label.END_TID - label.START_TID + 1 - label.POS_TID)) AS FINAL_COUNT
+     FROM tbl_prelabel_${t.companyId} label 
+     left join tbl_product_${t.companyId} pro on label.pid = pro.id 
+    <where>
+      1=1 and label.STATUS in(1,2)
+      <if test="t.productName != null and t.productName != ''">
+      AND  pro.NAME like '%${t.productName}%'
+      </if>
+      </where>
+      GROUP BY  pro.id 
+  </select>
+  
+  
+  <!-- 预申请单查询 -->
+  <select id="findPreLabel" resultMap="BaseResultMap" parameterType="java.util.HashMap" >
+  	 SELECT
+          label.ID ,
+          pro.name as product_name,
+          label.START_TID,
+          label.END_TID,
+          (label.END_TID - label.START_TID + 1) AS COUNT,
+          label.POS_TID as useCount,
+          (label.END_TID - label.START_TID + 1 - label.POS_TID) AS FINAL_COUNT,
+          label.STATUS,
+          label.CREATE_DATE
+     FROM tbl_prelabel_${t.companyId} label 
+     left join tbl_product_${t.companyId} pro on label.pid = pro.id 
+    <where>
+      1=1
+      <if test="t.productName != null and t.productName != ''">
+      AND  pro.NAME like '%${t.productName}%'
+      </if>
+      <if test="t.productId != null and t.productId != ''">
+      AND  pro.id = #{t.productId,jdbcType=DECIMAL}
+      </if>
+      <if test="t.status != null and t.status != ''">
+      AND  label.status = #{t.status,jdbcType=INTEGER}
+      </if>
+      </where>
+      ORDER BY label.id DESC
+  </select>
+  
+  <!-- 加入preLabel -->
+  <insert id="addPreLabel" parameterType="org.jymf.entity.LabelIndex">
+  	insert into TBL_PRELABEL_${companyId}
+	    (
+	    	STATUS,
+	        PID,
+	        START_TID,
+	        END_TID,
+	        POS_TID,
+	      	CREATE_DATE
+      )
+  values (
+       		3,
+        	#{productId,jdbcType=DECIMAL},
+	        #{startTid,jdbcType=DECIMAL},
+	        #{endTid,jdbcType=DECIMAL},
+	        0,
+		    NOW()
+   	  )
+  </insert>
+  
+  <update id="updatePreLabel" parameterType="org.jymf.entity.LabelIndex">
+  	update TBL_PRELABEL_${companyId}
+  	<set>
+	  	<if test="productId != null ">
+	  		pid = #{productId,jdbcType=DECIMAL},
+	  	</if>
+	  	<if test="startTid != null ">
+	  		start_tid = #{startTid,jdbcType=DECIMAL},
+	  	</if>
+	  	<if test="endTid != null ">
+	  		end_tid = #{endTid,jdbcType=DECIMAL},
+	  	</if>
+	  	<if test="useCount != null">
+	  		pos_tid = #{useCount,jdbcType=DECIMAL},
+	  	</if>
+	  	<if test="status != null">
+	  		status = #{status,jdbcType=DECIMAL},
+	  	</if>
+	  	<if test="productId != null">
+	  		pid = #{productId,jdbcType=DECIMAL},
+	  	</if>
+  	</set>
+  	where id = #{id,jdbcType=DECIMAL}
+  </update>
+  
+</mapper>
